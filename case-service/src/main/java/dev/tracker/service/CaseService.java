@@ -7,6 +7,7 @@ import dev.tracker.exceptions.CaseNotFoundException;
 import dev.tracker.repository.CaseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -19,6 +20,7 @@ import static dev.tracker.domain.CaseStatus.RESPONDED;
 public class CaseService {
     private final CaseRepository repository;
 
+    @Transactional
     public void create(CaseRequest caseRequest) {
         CaseEntry caseEntry = new CaseEntry();
 
@@ -30,30 +32,32 @@ public class CaseService {
         repository.save(caseEntry);
     }
 
-    public CaseEntry getById(UUID id){
+    @Transactional(readOnly = true)
+    public CaseEntry getById(UUID id) {
         return repository.findById(id).orElseThrow(() -> new RuntimeException("Case not found"));
     }
 
-    public void respond(UUID id){
+    @Transactional
+    public void respond(UUID id) {
         CaseEntry caseEntry = getById(id);
-        if(caseEntry.getStatus() == OPEN){
+        if (caseEntry.getStatus() == OPEN) {
             caseEntry.setStatus(RESPONDED);
-            repository.save(caseEntry);
-        }
-        else {
+        } else {
             throw new RuntimeException("Case is not open");
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<CaseEntry> findByStatus(CaseStatus status) {
+        return repository.findByStatus(status);
+    }
+
+    @Transactional
     public void deleteById(UUID id) {
         if (!repository.existsById(id)) {
             throw new CaseNotFoundException(id);
         }
         repository.deleteById(id);
-    }
-
-    public List<CaseEntry> findByStatus(CaseStatus status) {
-        return repository.findByStatus(status);
     }
 
 }

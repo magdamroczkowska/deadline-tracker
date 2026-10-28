@@ -22,17 +22,17 @@ public class CaseEntry {
     @Enumerated(EnumType.STRING)
     private CaseStatus status;
     private Instant deadline;
-    private Instant created_at;
-    private Instant updated_at;
+    private Instant createdAt;
+    private Instant updatedAt;
 
     @PrePersist
     void prePersist() {
-        created_at = Instant.now();
-        updated_at = Instant.now();
+        createdAt = Instant.now();
+        updatedAt = Instant.now();
     }
 
-    @PostPersist
+    @PreUpdate
     void postPersist() {
-        updated_at = Instant.now();
+        updatedAt = Instant.now();
     }
 }

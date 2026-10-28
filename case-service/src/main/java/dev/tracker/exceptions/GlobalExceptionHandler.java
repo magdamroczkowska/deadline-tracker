@@ -20,8 +20,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ProblemDetail handleMethodArgumentNotValidException(MethodArgumentNotValidException e)
-    {
+    public ProblemDetail handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 }

@@ -7,6 +7,7 @@ import dev.tracker.dto.CaseResponse;
 import dev.tracker.service.CaseService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,43 +16,40 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/cases")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CaseController {
-    CaseService caseService;
+    private final CaseService caseService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void createCase(@Valid @RequestBody CaseRequest request) {
-         caseService.create(request);
+        caseService.create(request);
     }
 
     @PostMapping("/{id}/respond")
-    @ResponseStatus(HttpStatus.CREATED)
-    public CaseResponse createResponse(@RequestParam UUID id) {
-         caseService.respond(id);
-         return CaseResponse.from(caseService.getById(id));
+    @ResponseStatus(HttpStatus.OK)
+    public CaseResponse createResponse(@PathVariable UUID id) {
+        caseService.respond(id);
+        return CaseResponse.from(caseService.getById(id));
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public CaseResponse getById(@PathVariable UUID id) {
-        CaseEntry caseEntry = caseService.getById(id);
-
-        return CaseResponse.from(caseEntry);
+        return CaseResponse.from(caseService.getById(id));
     }
 
-    @GetMapping("?status=OPEN")
+    @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<CaseResponse> getByOpenStatus(@RequestParam CaseStatus status) {
+    public List<CaseResponse> getByStatus(@RequestParam CaseStatus status) {
         List<CaseEntry> caseEntries = caseService.findByStatus(status);
 
         return caseEntries.stream().map(CaseResponse::from).toList();
     }
 
-
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@RequestParam UUID id) {
+    public void delete(@PathVariable UUID id) {
         caseService.deleteById(id);
     }
 
