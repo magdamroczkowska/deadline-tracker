@@ -22,8 +22,8 @@ public class CaseController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createCase(@Valid @RequestBody CaseRequest request) {
-        caseService.create(request);
+    public CaseResponse createCase(@Valid @RequestBody CaseRequest request) {
+        return caseService.create(request);
     }
 
     @PostMapping("/{id}/respond")

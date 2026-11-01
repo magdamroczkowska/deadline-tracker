@@ -3,7 +3,9 @@ package dev.tracker.service;
 import dev.tracker.domain.CaseEntry;
 import dev.tracker.domain.CaseStatus;
 import dev.tracker.dto.CaseRequest;
+import dev.tracker.dto.CaseResponse;
 import dev.tracker.exceptions.CaseNotFoundException;
+import dev.tracker.exceptions.InvalidCaseStatusException;
 import dev.tracker.repository.CaseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +23,7 @@ public class CaseService {
     private final CaseRepository repository;
 
     @Transactional
-    public void create(CaseRequest caseRequest) {
+    public CaseResponse create(CaseRequest caseRequest) {
         CaseEntry caseEntry = new CaseEntry();
 
         caseEntry.setClientName(caseRequest.clientName());
@@ -29,12 +31,12 @@ public class CaseService {
         caseEntry.setStatus(OPEN);
         caseEntry.setDeadline(caseRequest.deadline());
 
-        repository.save(caseEntry);
+        return CaseResponse.from(repository.save(caseEntry));
     }
 
     @Transactional(readOnly = true)
     public CaseEntry getById(UUID id) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Case not found"));
+        return repository.findById(id).orElseThrow(() -> new CaseNotFoundException(id));
     }
 
     @Transactional
@@ -43,7 +45,7 @@ public class CaseService {
         if (caseEntry.getStatus() == OPEN) {
             caseEntry.setStatus(RESPONDED);
         } else {
-            throw new RuntimeException("Case is not open");
+            throw new InvalidCaseStatusException(caseEntry.getStatus());
         }
     }
 
